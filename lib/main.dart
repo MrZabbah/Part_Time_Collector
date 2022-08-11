@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:part_time_hero/horizontal_curvy_clipper.dart';
+import 'package:part_time_hero/item.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,20 +27,86 @@ class RootPage extends StatefulWidget {
 }
 
 class _RootPageState extends State<RootPage> {
-  List<String> items = [];
+  List<Item> items = [Item('Red Dead Redemption 2')];
   int completedItemsCount = 0;
+  String itemName = '';
 
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final urlImage =
       'https://4.bp.blogspot.com/-sFiJklMll-M/W4u5WWmQvXI/AAAAAAAAARo/_v_GL40alTcTCvvya11BocrFEcgVrDH5wCLcBGAs/s1600/icon.png';
+
+  _saveItem(String name) {
+    setState(() {
+      items.add(Item(name));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.grey,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          setState(() {
-            items.add('Red Dead Redemption 2');
-          });
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return StatefulBuilder(
+                builder: ((context, setState) {
+                  return AlertDialog(
+                    content: Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextFormField(
+                            decoration: const InputDecoration(
+                              labelText: 'Name',
+                            ),
+                            validator: (value) => value != null && value.isEmpty
+                                ? 'Item must have a name'
+                                : null,
+                            onSaved: (value) => itemName = value!,
+                          ),
+                          ElevatedButton(
+                            onPressed: () async {
+                              final picker = ImagePicker();
+                              final pickedImage = await picker.pickImage(
+                                  source: ImageSource.gallery);
+
+                              if (pickedImage == null) return;
+
+                              // if(isFile)
+                            },
+                            child: const Text('Pick image'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text('CANCEL'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          final form = _formKey.currentState!;
+                          if (form.validate()) {
+                            form.save();
+                            _saveItem(itemName);
+                            Navigator.pop(context);
+                          }
+                        },
+                        child: const Text('SUBMIT'),
+                      ),
+                    ],
+                  );
+                }),
+              );
+            },
+          );
         },
         backgroundColor: const Color.fromARGB(255, 50, 66, 73),
         child: const Icon(Icons.add),
@@ -105,15 +173,21 @@ class _RootPageState extends State<RootPage> {
                             blurRadius: 5.0,
                           ),
                         ],
-                        image: DecorationImage(
-                          image: NetworkImage(urlImage),
-                          fit: BoxFit.cover,
-                        ),
+                      ),
+                      child: Image.network(
+                        urlImage,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) =>
+                            loadingProgress == null
+                                ? child
+                                : const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
                       ),
                     ),
                   );
                 },
-              )
+              ),
             ],
           ),
           Expanded(
@@ -123,65 +197,82 @@ class _RootPageState extends State<RootPage> {
               itemBuilder: (context, index) {
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Container(
-                        width: MediaQuery.of(context).size.width,
-                        decoration: const BoxDecoration(
-                          color: Color.fromARGB(255, 26, 26, 26),
+                  child: InkWell(
+                    onLongPress: () {
+                      setState(
+                        () {
+                          items[index].isCompleted = !items[index].isCompleted;
+                          items[index].isCompleted
+                              ? completedItemsCount++
+                              : completedItemsCount--;
+                        },
+                      );
+                    },
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Ink(
+                          width: MediaQuery.of(context).size.width,
+                          decoration: const BoxDecoration(
+                            color: Color.fromARGB(255, 26, 26, 26),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  width: MediaQuery.of(context).size.width / 6,
+                                ),
+                                Text(
+                                  items[index].name,
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                        ClipPath(
+                          clipper: HorizontalCurvyClipper(),
+                          child: Container(
+                            width: MediaQuery.of(context).size.width / 6,
+                            decoration: const BoxDecoration(
+                              //color: Color.fromARGB(255, 61, 62, 63),
+                              gradient: LinearGradient(
+                                  colors: [
+                                    Color.fromARGB(255, 61, 62, 63),
+                                    Color.fromARGB(255, 110, 110, 110),
+                                  ],
+                                  stops: [
+                                    0.6,
+                                    0.95
+                                  ],
+                                  begin: Alignment.bottomCenter,
+                                  end: Alignment.topCenter),
+                            ),
+                            child: const Padding(
+                              padding: EdgeInsets.all(16.0),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
                           child: Row(
                             children: [
                               SizedBox(
-                                width: MediaQuery.of(context).size.width / 6,
+                                width:
+                                    MediaQuery.of(context).size.width / (6 * 6),
                               ),
-                              Text(
-                                items[index],
-                                style: const TextStyle(color: Colors.white),
+                              Icon(
+                                Icons.star,
+                                color: (items[index].isCompleted)
+                                    ? const Color.fromARGB(255, 211, 163, 21)
+                                    : const Color.fromARGB(85, 0, 0, 0),
                               ),
                             ],
                           ),
-                        ),
-                      ),
-                      ClipPath(
-                        clipper: HorizontalCurvyClipper(),
-                        child: Container(
-                          width: MediaQuery.of(context).size.width / 6,
-                          decoration: const BoxDecoration(
-                            //color: Color.fromARGB(255, 61, 62, 63),
-                            gradient: LinearGradient(
-                                colors: [
-                                  Color.fromARGB(255, 61, 62, 63),
-                                  Color.fromARGB(255, 110, 110, 110),
-                                ],
-                                stops: [
-                                  0.6,
-                                  0.95
-                                ],
-                                begin: Alignment.bottomCenter,
-                                end: Alignment.topCenter),
-                          ),
-                          child: const Padding(
-                            padding: EdgeInsets.all(16.0),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: Row(
-                          children: [
-                            SizedBox(
-                              width:
-                                  MediaQuery.of(context).size.width / (6 * 6),
-                            ),
-                            const Icon(Icons.star_outline_rounded),
-                          ],
-                        ),
-                      )
-                    ],
+                        )
+                      ],
+                    ),
                   ),
                 );
               },
