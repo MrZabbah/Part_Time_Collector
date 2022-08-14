@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 
 import '../horizontal_curvy_clipper.dart';
@@ -5,13 +7,15 @@ import '../item.dart';
 
 class ItemCell extends StatelessWidget {
   final int index;
-  final List<Item> items;
+  final List<Item?> items;
   final void Function(int index) onUpdateCount;
+  final void Function(int index) onDelete;
   const ItemCell(
       {Key? key,
       required this.index,
       required this.items,
-      required this.onUpdateCount})
+      required this.onUpdateCount,
+      required this.onDelete})
       : super(key: key);
 
   @override
@@ -22,6 +26,7 @@ class ItemCell extends StatelessWidget {
         onLongPress: () {
           onUpdateCount(index);
         },
+        onDoubleTap: () => onDelete(index),
         child: Stack(
           clipBehavior: Clip.none,
           children: [
@@ -38,7 +43,7 @@ class ItemCell extends StatelessWidget {
                       width: MediaQuery.of(context).size.width / 6,
                     ),
                     Text(
-                      items[index].name,
+                      items[index]!.name,
                       style: const TextStyle(color: Colors.white),
                     ),
                   ],
@@ -73,7 +78,7 @@ class ItemCell extends StatelessWidget {
                   ),
                   Icon(
                     Icons.star,
-                    color: (items[index].isCompleted)
+                    color: (items[index]!.isCompleted)
                         ? const Color.fromARGB(255, 211, 163, 21)
                         : const Color.fromARGB(85, 0, 0, 0),
                   ),

@@ -1,4 +1,7 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:part_time_hero/components/add_item_dialog.dart';
 import 'package:part_time_hero/components/item_cell.dart';
 import 'package:part_time_hero/components/trophie_cell.dart';
@@ -28,10 +31,10 @@ class RootPage extends StatefulWidget {
 }
 
 class _RootPageState extends State<RootPage> {
-  List<Item> items = [Item('Red Dead Redemption 2', null)];
+  List<Item?> items = List.generate(25, (index) => null);
+  List<int> itemsOnRoad = [];
+  Set<int> availablePositions = <int>{};
   int completedItemsCount = 0;
-  String itemName = '';
-  String? trophiePath;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final urlImage =
@@ -39,16 +42,30 @@ class _RootPageState extends State<RootPage> {
 
   _saveItem(String name, String? trophiePath) {
     debugPrint('Name: $name - Path: $trophiePath');
+    int index = availablePositions.first;
+    availablePositions.remove(index);
+    itemsOnRoad.add(index);
     setState(() {
-      items.add(Item(name, trophiePath));
+      items[index] = (Item(name, trophiePath, index));
+    });
+  }
+
+  _deleteItem(int index) {
+    setState(() {
+      completedItemsCount = (items[index]!.isCompleted)
+          ? completedItemsCount - 1
+          : completedItemsCount;
+      items[index] = null;
+      availablePositions.add(index);
+      itemsOnRoad.remove(index);
     });
   }
 
   _updateCount(int index) {
     setState(
       () {
-        items[index].isCompleted = !items[index].isCompleted;
-        items[index].isCompleted
+        items[index]!.isCompleted = !items[index]!.isCompleted;
+        items[index]!.isCompleted
             ? completedItemsCount++
             : completedItemsCount--;
       },
@@ -57,11 +74,27 @@ class _RootPageState extends State<RootPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (availablePositions.isEmpty && itemsOnRoad.isEmpty) {
+      List<int> trophieOrder = List.generate(25, (index) => index);
+      trophieOrder.shuffle();
+      availablePositions.addAll(trophieOrder);
+    }
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.grey,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          if (availablePositions.isEmpty) {
+            Fluttertoast.showToast(
+              msg: "There is no more space",
+              toastLength: Toast.LENGTH_SHORT,
+              textColor: const Color.fromARGB(255, 255, 255, 255),
+              fontSize: 16,
+              backgroundColor: const Color.fromARGB(255, 90, 90, 90),
+            );
+            return;
+          }
           showDialog(
             context: context,
             builder: (BuildContext context) {
@@ -99,7 +132,7 @@ class _RootPageState extends State<RootPage> {
                     width: 8,
                   ),
                   Text(
-                    '$completedItemsCount/${items.length}',
+                    '$completedItemsCount/${itemsOnRoad.length}',
                     style: const TextStyle(color: Colors.white),
                   ),
                 ],
@@ -121,20 +154,22 @@ class _RootPageState extends State<RootPage> {
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 5),
                 itemBuilder: (context, index) {
-                  return TrophieCell(index: index, items: items);
+                  return TrophieCell(
+                      index: items[index]?.index ?? -1, items: items);
                 },
               ),
             ],
           ),
-          Expanded(
+          Flexible(
             child: ListView.builder(
               padding: EdgeInsets.zero,
-              itemCount: items.length,
+              itemCount: itemsOnRoad.length,
               itemBuilder: (context, index) {
                 return ItemCell(
-                  index: index,
+                  index: itemsOnRoad[index],
                   items: items,
                   onUpdateCount: _updateCount,
+                  onDelete: _deleteItem,
                 );
               },
             ),

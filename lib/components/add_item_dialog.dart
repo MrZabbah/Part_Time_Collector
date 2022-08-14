@@ -6,7 +6,7 @@ import '../item.dart';
 
 // ignore: must_be_immutable
 class AddItemDialog extends AlertDialog {
-  final List<Item> items;
+  final List<Item?> items;
   final GlobalKey<FormState> formKey;
   final void Function(String itemName, String? trophiePath) onSaveItem;
   String itemName = '';

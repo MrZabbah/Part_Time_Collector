@@ -5,7 +5,7 @@ import 'package:part_time_hero/item.dart';
 
 class TrophieCell extends StatelessWidget {
   final int index;
-  final List<Item> items;
+  final List<Item?> items;
   const TrophieCell(
       {Key? key, required, required this.index, required this.items})
       : super(key: key);
@@ -34,12 +34,13 @@ class TrophieCell extends StatelessWidget {
             ),
           ],
           image: (index >= items.length ||
-                  items[index].trophiePath == null ||
-                  !items[index].isCompleted)
+                  index < 0 ||
+                  items[index]!.trophiePath == null ||
+                  !items[index]!.isCompleted)
               ? const DecorationImage(image: AssetImage('images/question.jpg'))
               : DecorationImage(
                   image: FileImage(
-                    File(items[index].trophiePath!),
+                    File(items[index]!.trophiePath!),
                   ),
                 ),
         ),
