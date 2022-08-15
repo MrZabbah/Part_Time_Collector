@@ -37,7 +37,8 @@ class TrophieCell extends StatelessWidget {
                   index < 0 ||
                   items[index]!.trophiePath == null ||
                   !items[index]!.isCompleted)
-              ? const DecorationImage(image: AssetImage('images/question.jpg'))
+              ? const DecorationImage(
+                  image: AssetImage('images/locked_trophie.jpg'))
               : DecorationImage(
                   image: FileImage(
                     File(items[index]!.trophiePath!),

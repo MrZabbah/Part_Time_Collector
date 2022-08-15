@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:part_time_hero/components/add_item_dialog.dart';
@@ -160,19 +158,23 @@ class _RootPageState extends State<RootPage> {
               ),
             ],
           ),
-          Flexible(
-            child: ListView.builder(
-              padding: EdgeInsets.zero,
-              itemCount: itemsOnRoad.length,
-              itemBuilder: (context, index) {
-                return ItemCell(
-                  index: itemsOnRoad[index],
-                  items: items,
-                  onUpdateCount: _updateCount,
-                  onDelete: _deleteItem,
-                );
-              },
-            ),
+          Expanded(
+            child: itemsOnRoad.isEmpty
+                ? const Text('There is no goal. Please create one to start')
+                : ListView.builder(
+                    cacheExtent: 0,
+                    addAutomaticKeepAlives: true,
+                    padding: EdgeInsets.zero,
+                    itemCount: itemsOnRoad.length,
+                    itemBuilder: (context, index) {
+                      return ItemCell(
+                        index: itemsOnRoad[index],
+                        items: items,
+                        onUpdateCount: _updateCount,
+                        onDelete: _deleteItem,
+                      );
+                    },
+                  ),
           ),
         ],
       ),
