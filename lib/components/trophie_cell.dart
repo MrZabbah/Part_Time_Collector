@@ -43,6 +43,7 @@ class TrophieCell extends StatelessWidget {
                   image: FileImage(
                     File(items[index]!.trophiePath),
                   ),
+                  fit: BoxFit.cover,
                 ),
         ),
       ),
