@@ -8,9 +8,9 @@ import '../item.dart';
 class AddItemDialog extends AlertDialog {
   final List<Item?> items;
   final GlobalKey<FormState> formKey;
-  final void Function(String itemName, String? trophiePath) onSaveItem;
+  final void Function(String itemName, String trophiePath) onSaveItem;
   String itemName = '';
-  String? trophiePath;
+  String trophiePath = '';
 
   AddItemDialog(
       {Key? key,

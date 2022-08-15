@@ -79,15 +79,15 @@ class ItemCell extends StatelessWidget {
                           ? const Color.fromARGB(255, 211, 163, 21)
                           : const Color.fromARGB(85, 0, 0, 0),
                     ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width -
-                          8 * MediaQuery.of(context).size.width / (6 * 6),
-                    ),
-                    const Icon(
-                      Icons.slideshow_rounded,
-                      color: Color.fromARGB(255, 143, 143, 143),
-                    ),
                   ],
+                ),
+              ),
+              const Positioned(
+                right: 5,
+                bottom: 4,
+                child: Icon(
+                  Icons.slideshow_rounded,
+                  color: Color.fromARGB(255, 143, 143, 143),
                 ),
               )
             ],
