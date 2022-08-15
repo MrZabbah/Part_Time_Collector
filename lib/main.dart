@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -6,12 +8,15 @@ import 'package:part_time_hero/components/add_item_dialog.dart';
 import 'package:part_time_hero/components/item_cell.dart';
 import 'package:part_time_hero/components/trophie_cell.dart';
 import 'package:part_time_hero/item.dart';
+import 'package:part_time_hero/utils/items_database.dart';
 import 'package:part_time_hero/utils/simple_preferences.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SimplePreferences.init();
-
+  await ItemsDatabase.init();
+  final l = await ItemsDatabase.items();
+  debugPrint(l.toString());
   runApp(const MyApp());
 }
 
@@ -37,26 +42,40 @@ class RootPage extends StatefulWidget {
 class _RootPageState extends State<RootPage> {
   List<Item?> items = List.generate(25, (index) => null);
   List<int> itemsOnRoad = [];
-  Set<int> availablePositions = <int>{};
+  Queue<int> availablePositions = Queue<int>();
   int completedItemsCount = 0;
 
   @override
   void initState() {
     super.initState();
     completedItemsCount = SimplePreferences.getCompletedCount();
+    availablePositions = SimplePreferences.getAvailable();
+    _loadItems();
+  }
+
+  _loadItems() async {
+    final itemList = await ItemsDatabase.items();
+    setState(() {
+      for (var element in itemList) {
+        itemsOnRoad.add(element.index);
+        items[element.index] = element;
+      }
+    });
   }
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final urlImage =
       'https://4.bp.blogspot.com/-sFiJklMll-M/W4u5WWmQvXI/AAAAAAAAARo/_v_GL40alTcTCvvya11BocrFEcgVrDH5wCLcBGAs/s1600/icon.png';
 
-  _saveItem(String name, String? trophiePath) {
+  _saveItem(String name, String trophiePath) async {
     debugPrint('Name: $name - Path: $trophiePath');
-    int index = availablePositions.first;
-    availablePositions.remove(index);
+    int index = availablePositions.removeFirst();
     itemsOnRoad.add(index);
+    Item item = Item(name, trophiePath, index);
+    await ItemsDatabase.insertItem(item);
+    await SimplePreferences.setAvailablePositions(availablePositions.toList());
     setState(() {
-      items[index] = (Item(name, trophiePath, index));
+      items[index] = (item);
     });
   }
 
@@ -66,10 +85,12 @@ class _RootPageState extends State<RootPage> {
           ? completedItemsCount - 1
           : completedItemsCount;
       items[index] = null;
-      availablePositions.add(index);
+      availablePositions.addFirst(index);
       itemsOnRoad.remove(index);
     });
     await SimplePreferences.setCompletedCount(completedItemsCount);
+    await SimplePreferences.setAvailablePositions(availablePositions.toList());
+    await ItemsDatabase.deleteItem(index);
   }
 
   _deleteAll() async {
@@ -78,9 +99,10 @@ class _RootPageState extends State<RootPage> {
       itemsOnRoad = [];
       items.clear();
       items = List.generate(25, (index) => null);
-      availablePositions.clear();
     });
     await SimplePreferences.clearPreferences();
+    await ItemsDatabase.clearDatabase();
+    availablePositions = SimplePreferences.getAvailable();
   }
 
   _updateCount(int index) async {
@@ -92,18 +114,13 @@ class _RootPageState extends State<RootPage> {
             : completedItemsCount--;
       },
     );
+    await ItemsDatabase.insertItem(items[index]!);
     await SimplePreferences.setCompletedCount(completedItemsCount);
   }
 
   @override
   Widget build(BuildContext context) {
     final isDialOpen = ValueNotifier(false);
-
-    if (availablePositions.isEmpty && itemsOnRoad.isEmpty) {
-      List<int> trophieOrder = List.generate(25, (index) => index);
-      trophieOrder.shuffle();
-      availablePositions.addAll(trophieOrder);
-    }
 
     return WillPopScope(
       onWillPop: () async {
