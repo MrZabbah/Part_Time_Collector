@@ -36,7 +36,7 @@ class ItemCell extends StatelessWidget {
                   child: Row(
                     children: [
                       SizedBox(
-                        width: MediaQuery.of(context).size.width / 6,
+                        width: MediaQuery.of(context).size.width / 5.5,
                       ),
                       Text(
                         items[index]!.name,
@@ -49,7 +49,7 @@ class ItemCell extends StatelessWidget {
               ClipPath(
                 clipper: HorizontalCurvyClipper(),
                 child: Container(
-                  width: MediaQuery.of(context).size.width / 6,
+                  width: MediaQuery.of(context).size.width / 5.5,
                   decoration: const BoxDecoration(
                     //color: Color.fromARGB(255, 61, 62, 63),
                     gradient: LinearGradient(colors: [
@@ -71,7 +71,7 @@ class ItemCell extends StatelessWidget {
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     SizedBox(
-                      width: MediaQuery.of(context).size.width / (6 * 6),
+                      width: MediaQuery.of(context).size.width / (5.5 * 5.5),
                     ),
                     Icon(
                       Icons.star,
@@ -79,6 +79,16 @@ class ItemCell extends StatelessWidget {
                           ? const Color.fromARGB(255, 211, 163, 21)
                           : const Color.fromARGB(85, 0, 0, 0),
                     ),
+                    if (items[index]!.isCompleted)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Text(
+                          (index + 1).toString(),
+                          style: const TextStyle(
+                            color: Color.fromARGB(255, 211, 163, 21),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
