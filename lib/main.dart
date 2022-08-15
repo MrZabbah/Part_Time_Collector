@@ -6,8 +6,12 @@ import 'package:part_time_hero/components/add_item_dialog.dart';
 import 'package:part_time_hero/components/item_cell.dart';
 import 'package:part_time_hero/components/trophie_cell.dart';
 import 'package:part_time_hero/item.dart';
+import 'package:part_time_hero/utils/simple_preferences.dart';
 
-void main() {
+Future main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SimplePreferences.init();
+
   runApp(const MyApp());
 }
 
@@ -36,6 +40,12 @@ class _RootPageState extends State<RootPage> {
   Set<int> availablePositions = <int>{};
   int completedItemsCount = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    completedItemsCount = SimplePreferences.getCompletedCount();
+  }
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final urlImage =
       'https://4.bp.blogspot.com/-sFiJklMll-M/W4u5WWmQvXI/AAAAAAAAARo/_v_GL40alTcTCvvya11BocrFEcgVrDH5wCLcBGAs/s1600/icon.png';
@@ -50,7 +60,7 @@ class _RootPageState extends State<RootPage> {
     });
   }
 
-  _deleteItem(int index) {
+  _deleteItem(int index) async {
     setState(() {
       completedItemsCount = (items[index]!.isCompleted)
           ? completedItemsCount - 1
@@ -59,9 +69,10 @@ class _RootPageState extends State<RootPage> {
       availablePositions.add(index);
       itemsOnRoad.remove(index);
     });
+    await SimplePreferences.setCompletedCount(completedItemsCount);
   }
 
-  _deleteAll() {
+  _deleteAll() async {
     setState(() {
       completedItemsCount = 0;
       itemsOnRoad = [];
@@ -69,9 +80,10 @@ class _RootPageState extends State<RootPage> {
       items = List.generate(25, (index) => null);
       availablePositions.clear();
     });
+    await SimplePreferences.clearPreferences();
   }
 
-  _updateCount(int index) {
+  _updateCount(int index) async {
     setState(
       () {
         items[index]!.isCompleted = !items[index]!.isCompleted;
@@ -80,6 +92,7 @@ class _RootPageState extends State<RootPage> {
             : completedItemsCount--;
       },
     );
+    await SimplePreferences.setCompletedCount(completedItemsCount);
   }
 
   @override
