@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:awesome_icons/awesome_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -77,6 +78,16 @@ class _RootPageState extends State<RootPage> {
     setState(() {
       items[index] = (item);
     });
+  }
+
+  _updateItem(String name, String trophiePath, int index) async {
+    if (index < 0) return;
+    Item item = Item(name, trophiePath, itemsOnRoad[index],
+        items[itemsOnRoad[index]]!.isCompleted);
+    setState(() {
+      items[itemsOnRoad[index]] = item;
+    });
+    await ItemsDatabase.insertItem(item);
   }
 
   _deleteItem(int index) async {
@@ -161,7 +172,6 @@ class _RootPageState extends State<RootPage> {
                     return StatefulBuilder(
                       builder: ((context, setState) {
                         return AddItemDialog(
-                          items: items,
                           formKey: _formKey,
                           onSaveItem: _saveItem,
                         );
@@ -170,6 +180,11 @@ class _RootPageState extends State<RootPage> {
                   },
                 );
               },
+            ),
+            SpeedDialChild(
+              child: const Icon(Icons.info),
+              label: 'Info',
+              onTap: () {},
             ),
             SpeedDialChild(
                 child: const Icon(Icons.delete_forever),
@@ -241,11 +256,44 @@ class _RootPageState extends State<RootPage> {
                                 borderRadius: const BorderRadius.horizontal(
                                   left: Radius.circular(24),
                                 ),
+                                onPressed: (context) {},
+                                icon: FontAwesomeIcons.trophy,
+                                backgroundColor:
+                                    const Color.fromARGB(255, 5, 6, 70),
+                                foregroundColor: Colors.white,
+                              ),
+                              SlidableAction(
+                                onPressed: (context) {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return StatefulBuilder(
+                                        builder: ((context, setState) {
+                                          return AddItemDialog(
+                                            formKey: _formKey,
+                                            onUpdateItem: _updateItem,
+                                            itemName:
+                                                items[itemsOnRoad[index]]!.name,
+                                            trophiePath:
+                                                items[itemsOnRoad[index]]!
+                                                    .trophiePath,
+                                            index: index,
+                                          );
+                                        }),
+                                      );
+                                    },
+                                  );
+                                },
+                                icon: FontAwesomeIcons.envelopeOpenText,
+                                backgroundColor:
+                                    const Color.fromARGB(255, 1, 109, 64),
+                                foregroundColor: Colors.white,
+                              ),
+                              SlidableAction(
                                 onPressed: (context) {
                                   _deleteItem(itemsOnRoad[index]);
                                 },
-                                icon: Icons.delete,
-                                label: 'Delete',
+                                icon: FontAwesomeIcons.trash,
                                 backgroundColor:
                                     const Color.fromARGB(255, 156, 16, 6),
                                 foregroundColor: Colors.white,
