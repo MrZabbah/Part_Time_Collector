@@ -184,7 +184,54 @@ class _RootPageState extends State<RootPage> {
             SpeedDialChild(
               child: const Icon(Icons.info),
               label: 'Info',
-              onTap: () {},
+              onTap: () {
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return StatefulBuilder(
+                        builder: (context, setState) {
+                          return const AboutDialog(
+                            applicationName: 'Part Time Collector',
+                            applicationVersion: 'v0.1',
+                            children: [
+                              Text(
+                                'This application is currently under development.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.red,
+                                ),
+                              ),
+                              Divider(
+                                height: 16,
+                                color: Colors.transparent,
+                              ),
+                              Text(
+                                'Part Time Collector allows you to generate a list with up to 25 achievement to fulfill.',
+                                textAlign: TextAlign.justify,
+                              ),
+                              Divider(
+                                height: 8,
+                                color: Colors.transparent,
+                              ),
+                              Text(
+                                'Each achievement has its own image (by default or chosen), which will occupy a place in the trophy cabinet.',
+                                textAlign: TextAlign.justify,
+                              ),
+                              Divider(
+                                height: 8,
+                                color: Colors.transparent,
+                              ),
+                              Text(
+                                'Sliding an achivement to the right will leave visible a menu of options to delete or modify it.',
+                                textAlign: TextAlign.justify,
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    });
+              },
             ),
             SpeedDialChild(
                 child: const Icon(Icons.delete_forever),
@@ -249,17 +296,16 @@ class _RootPageState extends State<RootPage> {
                       itemCount: itemsOnRoad.length,
                       itemBuilder: (context, index) {
                         return Slidable(
-                          endActionPane: ActionPane(
+                          startActionPane: ActionPane(
                             motion: const ScrollMotion(),
                             children: [
                               SlidableAction(
-                                borderRadius: const BorderRadius.horizontal(
-                                  left: Radius.circular(24),
-                                ),
-                                onPressed: (context) {},
-                                icon: FontAwesomeIcons.trophy,
+                                onPressed: (context) {
+                                  _deleteItem(itemsOnRoad[index]);
+                                },
+                                icon: FontAwesomeIcons.trash,
                                 backgroundColor:
-                                    const Color.fromARGB(255, 5, 6, 70),
+                                    const Color.fromARGB(255, 156, 16, 6),
                                 foregroundColor: Colors.white,
                               ),
                               SlidableAction(
@@ -290,12 +336,23 @@ class _RootPageState extends State<RootPage> {
                                 foregroundColor: Colors.white,
                               ),
                               SlidableAction(
+                                borderRadius: const BorderRadius.horizontal(
+                                  right: Radius.circular(24),
+                                ),
                                 onPressed: (context) {
-                                  _deleteItem(itemsOnRoad[index]);
+                                  Fluttertoast.showToast(
+                                    msg: "Not available yet",
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    textColor: const Color.fromARGB(
+                                        255, 255, 255, 255),
+                                    fontSize: 16,
+                                    backgroundColor:
+                                        const Color.fromARGB(255, 90, 90, 90),
+                                  );
                                 },
-                                icon: FontAwesomeIcons.trash,
+                                icon: FontAwesomeIcons.trophy,
                                 backgroundColor:
-                                    const Color.fromARGB(255, 156, 16, 6),
+                                    const Color.fromARGB(255, 5, 6, 70),
                                 foregroundColor: Colors.white,
                               ),
                             ],
