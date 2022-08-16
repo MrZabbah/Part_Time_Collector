@@ -33,18 +33,23 @@ class TrophieCell extends StatelessWidget {
               blurRadius: 5.0,
             ),
           ],
-          image: (index >= items.length ||
-                  index < 0 ||
-                  items[index]!.trophiePath.isEmpty ||
-                  !items[index]!.isCompleted)
-              ? const DecorationImage(
-                  image: AssetImage('images/locked_trophie.jpg'))
-              : DecorationImage(
-                  image: FileImage(
-                    File(items[index]!.trophiePath),
-                  ),
-                  fit: BoxFit.cover,
-                ),
+          image:
+              (index >= items.length || index < 0 || !items[index]!.isCompleted)
+                  ? const DecorationImage(
+                      image: AssetImage('images/locked_trophie.jpg'),
+                    )
+                  : (items[index]!.trophiePath.isEmpty)
+                      ? DecorationImage(
+                          image: AssetImage(
+                              'images/trophies/trophie_${items[index]!.index + 1}.jpg'),
+                          fit: BoxFit.cover,
+                        )
+                      : DecorationImage(
+                          image: FileImage(
+                            File(items[index]!.trophiePath),
+                          ),
+                          fit: BoxFit.cover,
+                        ),
         ),
       ),
     );
